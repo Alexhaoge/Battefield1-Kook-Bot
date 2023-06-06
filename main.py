@@ -4,8 +4,8 @@ from khl import Bot, Message, MessageTypes
 from secret import token
 from random import choice
 
-from .library.utils import request_API
-from .library.cardTemplate import render_card
+from library.utils import request_API
+from library.cardTemplate import render_card
 
 bot = Bot(token=token)
 
@@ -21,7 +21,9 @@ async def bf1_player_stat(msg: Message, origin_id: str):
     # result['__update_time'] = time()
     # html = apply_template(result,'bf1', '/')
     # pic = await html_to_pic(html, viewport={"width": 700,"height":10})
-    await msg.reply(render_card(result), type=MessageTypes.CARD)
+    cm = render_card(result)
+    logging.info(str(cm))
+    await msg.reply(cm, type=MessageTypes.CARD)
 
 logging.basicConfig(level='INFO')
 bot.run()

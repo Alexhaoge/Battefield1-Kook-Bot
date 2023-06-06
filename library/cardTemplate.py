@@ -1,13 +1,13 @@
 import time
-from khl.card import CardMessage, Card, Module, Element, Types, Struct, Theme
+from khl.card import CardMessage, Card, Module, Element, Types, Struct
 
 def render_card(d: dict, top_n: int = 3) -> CardMessage:
-    c = Card(
+    c1 = Card(
         Module.Header(f"战地1统计数据 - [{d['activePlatoon']['tag']}]{d['userName']}"),
         Module.Divider(),
         Module.Section(Element.Text("**基本数据**\n")),
         Module.Section(Struct.Paragraph(
-            cols=3, fields=[
+            3, [
                 Element.Text(f"**等级**: {d['rank']}"),
                 Element.Text(f"**游戏时间**: {d['secondsPlayed']/3600}"),
                 Element.Text(f"**击杀**: {d['kills']}"),
@@ -25,14 +25,18 @@ def render_card(d: dict, top_n: int = 3) -> CardMessage:
                 Element.Text(f"**最高连杀**: {d['highestKillStreak']}"),
             ]
         )),
-        Module.Section(Element.Text("**武器信息**\n")),  
+        Element.Text(f"最后更新于{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"),
         theme=Types.Theme.SUCCESS, size=Types.Size.LG
     )
     
     weapons = sorted(d['weapons'], key=lambda k: k['kills'], reverse=True)[0:top_n]
+    c2 = Card(
+        Module.Section(Element.Text("**武器信息**\n")), 
+        theme=Types.Theme.SUCCESS, size=Types.Size.LG
+    )
     for w in weapons:
-        c.append(Module.Section(Struct.Paragraph(
-            cols=3, fields=[
+        c2.append(Module.Section(Struct.Paragraph(
+            3, [
                 Element.Text(f"**{w['weaponName']}**"),
                 Element.Text(f"**游戏时间**: {w['timeEquipped']/3600}"),
                 Element.Text(f"**击杀**: {w['kills']}"),
@@ -44,11 +48,14 @@ def render_card(d: dict, top_n: int = 3) -> CardMessage:
             ]
         )))
 
-    c.append(Module.Section(Element.Text("**载具信息**\n")))
     vehicles = sorted(d['vehicles'], key=lambda k: k['kills'], reverse=True)[0:top_n]
+    c3 = Card(
+        Module.Section(Element.Text("**载具信息**\n")), 
+        theme=Types.Theme.SUCCESS, size=Types.Size.LG
+    )
     for v in vehicles:
-        c.append(Module.Section(Struct.Paragraph(
-            cols=3, fields=[
+        c3.append(Module.Section(Struct.Paragraph(
+            3, [
                 Element.Text(f"**{v['vehicleName']}**"),
                 Element.Text(f"**游戏时间**: {v['timeIn']/3600}"),
                 Element.Text(f"**击杀**: {v['kills']}"),
@@ -58,7 +65,4 @@ def render_card(d: dict, top_n: int = 3) -> CardMessage:
             ]
         )))
 
-    c.append(Module.Section(
-        Element.Text(f"最后更新于{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(d['__update_time']))}")
-    ))
-    return CardMessage(c)
+    return CardMessage(c1, c2, c3)
