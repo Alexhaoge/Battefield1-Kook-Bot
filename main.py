@@ -3,7 +3,6 @@ import logging
 from khl import Bot, Message, MessageTypes
 from secret import token
 from random import choice
-from nonebot_plugin_htmlrender import md_to_pic, html_to_pic
 
 from .library.utils import request_API
 from .library.cardTemplate import render_card
