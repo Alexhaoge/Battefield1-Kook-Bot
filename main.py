@@ -22,8 +22,7 @@ async def bf1_player_stat(msg: Message, origin_id: str):
     # html = apply_template(result,'bf1', '/')
     # pic = await html_to_pic(html, viewport={"width": 700,"height":10})
     cm = render_card(result)
-    logging.info(str(cm))
-    await msg.reply(cm, type=MessageTypes.CARD)
+    await msg.reply(cm)
 
-logging.basicConfig(level='INFO')
+logging.basicConfig(level='DEBUG')
 bot.run()
