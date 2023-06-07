@@ -87,3 +87,22 @@ def render_find_server_card(d: dict):
         c.append(Module.Divider())
     c.append(Module.Section("最多显示10条结果"))
     return CardMessage(c)
+
+def render_recent_card(d: list):
+    c = Card(theme=Types.Theme.SUCCESS, size=Types.Size.LG)
+    n = len(d)
+    for i in range(n):
+        c.append(Module.Section(Element.Text(f"{d[i]['server']}\n")))
+        c.append(
+            Module.Section(Struct.Paragraph(
+                3,
+                Element.Text(f"模式:\n{d[i]['mode']}"),
+                Element.Text(f"地图:\n{d[i]['map']}"),
+                Element.Text(f"结果:\n{d[i]['result']}"),
+                Element.Text(f"击杀:\n{d[i]['Kills']}"),
+                Element.Text(f"死亡:\n{d[i]['Deaths']}"),
+                Element.Text(f"KD:\n{d[i]['K/D']}"),
+            ))
+        )
+        c.append(Module.Divider())
+    return CardMessage(c)

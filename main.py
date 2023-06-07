@@ -5,9 +5,9 @@ from khl import Bot, Message, MessageTypes
 from secret import token
 from random import choice
 
-from library.utils import request_API
+from library.utils import request_API, bftracker_recent
 from library.cardTemplate import (
-    render_stat_card, render_find_server_card
+    render_stat_card, render_find_server_card, render_recent_card
 )
 
 bot = Bot(token=token)
@@ -46,13 +46,12 @@ async def bf1_find_server(msg: Message, server_name: str):
 
 @bot.command(name='r')
 async def bf1_recent(msg: Message, origin_id: str):
-    result = request_API('bf1','all',{'name':origin_id, 'lang':'zh-tw'})
-    if isinstance(result, requests.Response):
-        if result.status_code == 404:
-            logging.warning(f'BF1 User {origin_id} not found')
-        await msg.reply(f'玩家{origin_id}不存在')
+    result = bftracker_recent(origin_id)
+    if isinstance(result, str):
+        logging.warning(result)
+        await msg.reply(result)
         return
-    pass
+    await msg.reply(render_recent_card(result))
     #await msg.reply(cm)
 
 logging.basicConfig(level='INFO')
