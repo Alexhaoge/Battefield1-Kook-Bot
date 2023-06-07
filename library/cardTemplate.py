@@ -1,7 +1,10 @@
 import time
 from khl.card import CardMessage, Card, Module, Element, Types, Struct
 
-def render_card(d: dict, top_n: int = 3) -> CardMessage:
+def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
+    """
+    Render card message for /stat
+    """
     c1 = Card(
         Module.Header(f"战地1统计数据 - [{d['activePlatoon']['tag']}]{d['userName']}"),
         Module.Divider(),
@@ -20,7 +23,7 @@ def render_card(d: dict, top_n: int = 3) -> CardMessage:
             Element.Text(f"**修理**: {d['repairs']}"),
             Element.Text(f"**命中**: {d['accuracy']}"),
             Element.Text(f"**爆头**: {d['headshots']}"),
-            Element.Text(f"**最远爆头**: {d['rank']}"),
+            Element.Text(f"**最远爆头**: {d['longestHeadShot']}"),
             Element.Text(f"**胜率**: {d['winPercent']}"),
             Element.Text(f"**最高连杀**: {d['highestKillStreak']}")
         )),
