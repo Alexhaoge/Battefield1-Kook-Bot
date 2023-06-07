@@ -5,27 +5,28 @@ def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
     """
     Render card message for /stat
     """
+    platoon = f"[{d['activePlatoon']['tag']}]" if d['activePlatoon']['tag'] else ''
     c1 = Card(
-        Module.Header(f"战地1统计数据 - [{d['activePlatoon']['tag']}]{d['userName']}"),
+        Module.Header(f"战地1统计数据 - {platoon}{d['userName']}"),
         Module.Divider(),
         Module.Section(Element.Text("**基本数据**\n")),
         Module.Section(Struct.Paragraph(
             3,
-            Element.Text(f"**等级**: {d['rank']}"),
-            Element.Text(f"**游戏时间**: {round(d['secondsPlayed']/3600, 2)}"),
-            Element.Text(f"**击杀**: {d['kills']}"),
-            Element.Text(f"**死亡**: {d['deaths']}"),
-            Element.Text(f"**KD**: {d['killDeath']}"),
-            Element.Text(f"**KPM**: {d['killsPerMinute']}"),
-            Element.Text(f"**SPM**: {d['scorePerMinute']}"),
-            Element.Text(f"**复活**: {d['revives']}"),
-            Element.Text(f"**治疗**: {d['heals']}"),
-            Element.Text(f"**修理**: {d['repairs']}"),
-            Element.Text(f"**命中**: {d['accuracy']}"),
-            Element.Text(f"**爆头**: {d['headshots']}"),
-            Element.Text(f"**最远爆头**: {d['longestHeadShot']}"),
-            Element.Text(f"**胜率**: {d['winPercent']}"),
-            Element.Text(f"**最高连杀**: {d['highestKillStreak']}")
+            Element.Text(f"**等级**:\n{d['rank']}"),
+            Element.Text(f"**游戏时间**:\n{round(d['secondsPlayed']/3600, 2)}小时"),
+            Element.Text(f"**击杀**:\n{d['kills']}"),
+            Element.Text(f"**死亡**:\n{d['deaths']}"),
+            Element.Text(f"**KD**:\n{d['killDeath']}"),
+            Element.Text(f"**KPM**:\n{d['killsPerMinute']}"),
+            Element.Text(f"**SPM**:\n{d['scorePerMinute']}"),
+            Element.Text(f"**复活**:\n{d['revives']}"),
+            Element.Text(f"**治疗**:\n{d['heals']}"),
+            Element.Text(f"**修理**:\n{d['repairs']}"),
+            Element.Text(f"**命中**:\n{d['accuracy']}"),
+            Element.Text(f"**爆头**:\n{d['headshots']}"),
+            Element.Text(f"**最远爆头**:\n{d['longestHeadShot']}"),
+            Element.Text(f"**胜率**:\n{d['winPercent']}"),
+            Element.Text(f"**最高连杀**:\n{d['highestKillStreak']}")
         )),
         Module.Section(
             f"最后更新于{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
@@ -42,13 +43,13 @@ def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
         c2.append(Module.Section(Struct.Paragraph(
             3,
             Element.Text(f"**{w['weaponName']}**"),
-            Element.Text(f"**游戏时间**: {round(w['timeEquipped']/3600, 2)}"),
-            Element.Text(f"**击杀**: {w['kills']}"),
-            Element.Text(f"**命中**: {w['accuracy']}"),
-            Element.Text(f"**KPM**: {w['killsPerMinute']}"),
-            Element.Text(f"**爆头**: {w['headshotKills']}"),
-            Element.Text(f"**爆头率**: {w['headshots']}"),
-            Element.Text(f"**效率**: {w['hitVKills']}")
+            Element.Text(f"**游戏时间**:\n{round(w['timeEquipped']/3600, 2)}小时"),
+            Element.Text(f"**击杀**:\n{w['kills']}"),
+            Element.Text(f"**命中**:\n{w['accuracy']}"),
+            Element.Text(f"**KPM**:\n{w['killsPerMinute']}"),
+            Element.Text(f"**爆头**:\n{w['headshotKills']}"),
+            Element.Text(f"**爆头率**:\n{w['headshots']}"),
+            Element.Text(f"**效率**:\n{w['hitVKills']}")
         )))
 
     vehicles = sorted(d['vehicles'], key=lambda k: k['kills'], reverse=True)[0:top_n]
@@ -60,12 +61,29 @@ def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
         c3.append(Module.Section(Struct.Paragraph(
             3, 
             Element.Text(f"**{v['vehicleName']}**"),
-            Element.Text(f"**游戏时间**: {round(v['timeIn']/3600, 2)}"),
-            Element.Text(f"**击杀**: {v['kills']}"),
+            Element.Text(f"**游戏时间**:\n{round(v['timeIn']/3600, 2)}小时"),
+            Element.Text(f"**击杀**:\n{v['kills']}"),
             Element.Text(""),
-            Element.Text(f"**KPM**: {v['killsPerMinute']}"),
-            Element.Text(f"**摧毁**: {v['destroyed']}")
+            Element.Text(f"**KPM**:\n{v['killsPerMinute']}"),
+            Element.Text(f"**摧毁**:\n{v['destroyed']}")
         )))
-    print(Card)
 
     return CardMessage(c1, c2, c3)
+
+def render_find_server_card(d: dict):
+    c = Card(theme=Types.Theme.SUCCESS, size=Types.Size.LG)
+    n = len(d['servers'])
+    for i in range(n):
+        server = d['servers'][i]
+        c.append(Module.Section(Element.Text(f"**{server['prefix']}**\n")))
+        c.append(
+            Module.Section(Struct.Paragraph(
+                3,
+                Element.Text(f"人数[排队]:\n{server['serverInfo']}[{server['inQue']}]"),
+                Element.Text(f"模式:\n{server['mode']}"),
+                Element.Text(f"地图:\n{server['currentMap']}"),
+            ))
+        )
+        c.append(Module.Divider())
+    c.append(Module.Section("最多显示10条结果"))
+    return CardMessage(c)
