@@ -39,8 +39,9 @@ def bftracker_recent(origin_id: str, top_n: int = 3) -> Union[list, str]:
         team = me.findParents(class_="team")[0].select_one('.card-heading .card-title').contents[0]
         if team == 'No Team':
             game_stat['result'] = '未结算'
-        team_win = soup.select('.card.match-attributes .stat .name')[1].find_previous_sibling(class_='value').contents[0]
-        game_stat['result'] = '胜利' if team == team_win else '落败'
+        else:
+            team_win = soup.select('.card.match-attributes .stat .name')[1].find_previous_sibling(class_='value').contents[0]
+            game_stat['result'] = '胜利' if team == team_win else '落败'
         
         map_info = soup.select_one('.match-header .activity-details')
         game_stat['map'] = map_info.select_one('.map-name').contents[0]
