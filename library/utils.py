@@ -60,6 +60,7 @@ def bftracker_recent(origin_id: str, top_n: int = 3) -> Union[list, str]:
         game_stat['map'] = map_info.select_one('.map-name').contents[0]
         game_stat['mode'] = map_info.select_one('.type').contents[0]
         game_stat['server'] = map_info.select_one('.map-name small').contents[0]
+        game_stat['matchDate'] = map_info.select_one('.date').contents[0]
 
         games_dat.append(game_stat)
     
