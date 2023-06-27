@@ -1,6 +1,8 @@
 import json
 import requests
 import bs4
+import re
+import sqlite3
 from typing import Union
 
 API_SITE = "https://api.gametools.network/"
@@ -14,6 +16,7 @@ def request_API(game, prop='stats', params={}) -> Union[dict, requests.Response]
     else:
         return res
     
+
 def bftracker_recent(origin_id: str, top_n: int = 3) -> Union[list, str]:
     headers = {
         "Connection": "keep-alive",
@@ -34,15 +37,20 @@ def bftracker_recent(origin_id: str, top_n: int = 3) -> Union[list, str]:
         soup = bs4.BeautifulSoup(game_req.text, 'html.parser')
 
         me = soup.select_one('.player.active')
-        game_stat = {s.select_one('.name').text:s.select_one('.value').text for s in me.select('.quick-stats .stat')}
-        
+        game_stat = {s.select_one('.name').text:int(s.select_one('.value')) for s in me.select('.quick-stats .stat')[0:-1]}
+        game_stat['kd'] = round(game_stat[i]['Kills'] / game_stat[i]['Deaths'] if game_stat[i]['Deaths'] else game_stat[i]['Kills'], 2)
+        duration = re.findall('[0-9]+m|[0-9]s', me.select_one('.player-subline').contents[0])
+        duration_in_min = int(duration[0][0:-1]) + int(duration[0][0:-1]) / 60
+        game_stat['kpm'] = game_stat['Kills'] / duration_in_min
+        game_stat['duration'] = ''.join(duration)
+
         team = me.findParents(class_="team")[0].select_one('.card-heading .card-title').contents[0]
         if team == 'No Team':
             game_stat['result'] = '未结算'
         else:
-            team_win = soup.select('.card.match-attributes .stat .name')[1].find_previous_sibling(class_='value').contents[0]
+            team_win = soup.select('.card.match-attributes .stat .value')[1].contents[0]
             game_stat['result'] = '胜利' if team == team_win else '落败'
-        
+
         map_info = soup.select_one('.match-header .activity-details')
         game_stat['map'] = map_info.select_one('.map-name').contents[0]
         game_stat['mode'] = map_info.select_one('.type').contents[0]
@@ -51,3 +59,19 @@ def bftracker_recent(origin_id: str, top_n: int = 3) -> Union[list, str]:
         games_dat.append(game_stat)
     
     return games_dat
+
+
+def verify_originid(origin_id: str) -> bool:
+    result = request_API('bf1', 'player', {'name': origin_id})
+    if isinstance(result, requests.Response):
+        if result.status_code == 404:
+            return False
+    return True
+
+
+def db_op(con: sqlite3.Connection, sql: str):
+    cur = con.cursor()
+    res = con.execute(sql).fetchall()
+    cur.connection.commit()
+    cur.close()
+    return res    

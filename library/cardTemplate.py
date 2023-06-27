@@ -101,7 +101,10 @@ def render_recent_card(d: list):
                 Element.Text(f"结果:\n{d[i]['result']}"),
                 Element.Text(f"击杀:\n{d[i]['Kills']}"),
                 Element.Text(f"死亡:\n{d[i]['Deaths']}"),
-                Element.Text(f"KD:\n{d[i]['K/D']}"),
+                Element.Text(f"KD:\n{d[i]['kd']}"),
+                Element.Text(f"时长:\n{d[i]['duration']}"),
+                Element.Text(f"KPM:\n{d[i]['kpm']}"),
+                Element.Text(f"得分:\n{d[i]['Score']}")
             ))
         )
         c.append(Module.Divider())
