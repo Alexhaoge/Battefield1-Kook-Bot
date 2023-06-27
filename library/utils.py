@@ -37,9 +37,9 @@ def bftracker_recent(origin_id: str, top_n: int = 3) -> Union[list, str]:
         soup = bs4.BeautifulSoup(game_req.text, 'html.parser')
 
         me = soup.select_one('.player.active')
-        game_stat = {s.select_one('.name').text:int(s.select_one('.value')) for s in me.select('.quick-stats .stat')[0:-1]}
+        game_stat = {s.select_one('.name').text:int(s.select_one('.value').text) for s in me.select('.quick-stats .stat')[0:-1]}
         game_stat['kd'] = round(game_stat[i]['Kills'] / game_stat[i]['Deaths'] if game_stat[i]['Deaths'] else game_stat[i]['Kills'], 2)
-        duration = re.findall('[0-9]+m|[0-9]s', me.select_one('.player-subline').contents[0])
+        duration = re.findall('[0-9]+m|[0-9]s', me.select_one('.player-subline').text)
         duration_in_min = int(duration[0][0:-1]) + int(duration[0][0:-1]) / 60
         game_stat['kpm'] = game_stat['Kills'] / duration_in_min
         game_stat['duration'] = ''.join(duration)
