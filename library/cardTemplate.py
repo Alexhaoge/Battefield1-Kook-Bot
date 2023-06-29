@@ -1,5 +1,6 @@
 import time
 from khl.card import CardMessage, Card, Module, Element, Types, Struct
+from .util_dict import map_zh_dict
 
 def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
     """
@@ -80,8 +81,8 @@ def render_find_server_card(d: dict):
             Module.Section(Struct.Paragraph(
                 3,
                 Element.Text(f"人数[排队]:\n{server['serverInfo']}[{server['inQue']}]"),
-                Element.Text(f"模式:\n{server['mode']}"),
-                Element.Text(f"地图:\n{server['currentMap']}"),
+                Element.Text(f"模式:\n{map_zh_dict[server['mode']]}"),
+                Element.Text(f"地图:\n{map_zh_dict[server['currentMap']]}"),
             ))
         )
         c.append(Module.Divider())
@@ -96,9 +97,9 @@ def render_recent_card(d: list):
         c.append(
             Module.Section(Struct.Paragraph(
                 3,
-                Element.Text(f"模式:\n{d[i]['mode']}"),
-                Element.Text(f"地图:\n{d[i]['map']}"),
-                Element.Text(f"结果:\n{d[i]['result']}"),
+                Element.Text(f"模式:{map_zh_dict[d[i]['mode']]}"),
+                Element.Text(f"地图:{map_zh_dict[d[i]['map']]}"),
+                Element.Text(f"结果:{d[i]['result']}"),
                 Element.Text(f"击杀:{d[i]['Kills']}"),
                 Element.Text(f"死亡:{d[i]['Deaths']}"),
                 Element.Text(f"KD:{d[i]['kd']}"),

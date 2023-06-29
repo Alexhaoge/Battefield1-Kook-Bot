@@ -52,9 +52,9 @@ async def process_top_n(game: str, headers: dict, retry: int = 3):
     else:
         game_stat['duration'] = game_stat['kpm'] = 'N/A'
 
-    detail_general_card = me.select_one('.player-details h4', string='General').parent.parent
+    detail_general_card = me.findChild(name='h4', string='General').parent.parent
     game_stat['headshot'] = 'N/A'
-    headshot_name_tag = detail_general_card.select_one('.stats .stat .name', string='Headshots')
+    headshot_name_tag = detail_general_card.findChild(class_='name', string='Headshots')
     if headshot_name_tag:
         game_stat['headshot'] = int(headshot_name_tag.find_previous_sibling(class_='value').contents[0])
 
