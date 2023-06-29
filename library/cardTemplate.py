@@ -81,8 +81,8 @@ def render_find_server_card(d: dict):
             Module.Section(Struct.Paragraph(
                 3,
                 Element.Text(f"人数[排队]:\n{server['serverInfo']}[{server['inQue']}]"),
-                Element.Text(f"模式:\n{map_zh_dict[server['mode']]}"),
-                Element.Text(f"地图:\n{map_zh_dict[server['currentMap']]}"),
+                Element.Text(f"模式:\n{server['mode']}"),
+                Element.Text(f"地图:\n{server['currentMap']}"),
             ))
         )
         c.append(Module.Divider())
