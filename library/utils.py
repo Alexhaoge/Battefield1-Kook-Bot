@@ -154,9 +154,9 @@ def upd_sessionID(remid: str, sid: str) -> Tuple[str, str, str]:
     return remid, sid, sessionID    
 
 
-def db_op(con: sqlite3.Connection, sql: str, params: list):
-    cur = con.cursor()
-    res = con.execute(sql, params).fetchall()
+def db_op(conn: sqlite3.Connection, sql: str, params: list):
+    cur = conn.cursor()
+    res = conn.execute(sql, params).fetchall()
     cur.connection.commit()
     cur.close()
     return res    
