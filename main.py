@@ -1,7 +1,8 @@
 import logging
-import sqlite3
-import requests
-import atexit
+import aiosqlite
+# import sqlite3
+import asyncio
+# import atexit
 
 from khl import Bot, Message
 from secret import token, super_admin
@@ -14,10 +15,13 @@ from library.misc import init_misc
 
 bot = Bot(token=token)
 logging.basicConfig(level='INFO')
-conn = sqlite3.connect('bot.db')
+conn = 'bot.db'
+# conn = aiosqlite.connect('bot.db')
+# conn = sqlite3.connect('bot.db')
 
-def close_db():
-    conn.close()
+# @atexit.register
+# def close_db():
+#     conn.close()
 
 @bot.on_startup
 async def bot_init(bot: Bot):
@@ -32,6 +36,16 @@ async def bot_init(bot: Bot):
     init_misc(bot)
     #logging.info("Miscellaneous module launched")
 
+# @bot.on_shutdown
+# async def bot_end(bot: Bot):
+#     await conn.close()
 
-atexit.register(close_db)
 bot.run()
+
+# if not bot.loop:
+#     bot.loop = asyncio.get_event_loop()
+# try:
+#     bot.loop.run_until_complete(bot.start())
+# except KeyboardInterrupt or InterruptedError:
+#     bot.loop.run_until_complete(bot_end(bot))
+#     logging.info('see you next time')

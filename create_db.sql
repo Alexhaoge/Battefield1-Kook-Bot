@@ -56,6 +56,7 @@ create table `server_bans` (
     `originid` varchar(255) NOT NULL,
     `group` varchar(255) NOT NULL,
     `gameid` BIGINT NOT NULL,
+    `reason` varchar(255) DEFAULT NULL,
     PRIMARY KEY(`personaid`, `gameid`),
     FOREIGN KEY (`group`) REFERENCES `server_groups`(`name`) ON DELETE CASCADE,
     FOREIGN KEY (`gameid`) REFERENCES `servers`(`gameid`) ON DELETE CASCADE
