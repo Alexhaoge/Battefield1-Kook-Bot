@@ -4,7 +4,7 @@ from khl import Bot, Message, MessageTypes
 # from aiosqlite import Connection
 from asyncio import create_task, gather
 from httpx import Response
-from traceback import format_exception
+from traceback import format_exc
 from datetime import date, timedelta
 
 from .util_dict import map_zh_dict, zh_team_name_by_key
@@ -56,7 +56,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
 
     # Kick player
@@ -93,7 +93,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
 
     ##############################################################################################
@@ -155,7 +155,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
 
     ##############################################################################################
@@ -194,7 +194,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
     
     @bot.command(name='unban')
     async def bf1_unban(msg:Message, group_name: str, group_num: int, originid: str):
@@ -233,7 +233,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
 
     ##############################################################################################
@@ -255,7 +255,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             msg = se.echo(admin[0][2], admin[0][0])
         except Exception as e:
-            msg = format_exception(e, limit=2)
+            msg = format_exc(limit=2)
         return msg
     
     @bot.command(name="bana")
@@ -304,7 +304,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             msg = se.echo(admin[0][2], admin[0][0])
         except Exception as e:
-            msg = format_exception(e, limit=2)
+            msg = format_exc(limit=2)
         return msg
         return msg
 
@@ -387,7 +387,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
     @bot.command(name='unvip')
     async def bf1_unvip(msg:Message, group_name: str, group_num: int, originid: str):
@@ -428,7 +428,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
     @bot.command(name='viplist')
     async def bf1_viplist(msg:Message, group_name: str, group_num: int):
@@ -472,7 +472,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
     @bot.command(name='checkvip')
     async def bf1_checkvip(msg:Message, group_name: str, group_num: int):
@@ -519,7 +519,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(format_exception(e, limit=2))
+            await msg.reply(format_exc(limit=2))
 
 
     # @bot.command(name="pl")
