@@ -72,15 +72,15 @@ create table `server_vips` (
     FOREIGN KEY (`gameid`) REFERENCES `servers`(`gameid`) ON DELETE CASCADE
 );
 
-drop table if exists `admin_logs`;
-create table `admin_logs` (
-    `logid` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `admin_originid` varchar(255) NOT NULL,
-    `admin_kookusrname` varchar(255) NOT NULL,
-    `player_originid` varchar(255) NOT NULL,
-    `gameid` BIGINT NOT NULL,
-    `operation` varchar(32) NOT NULL,
-    `reason` varchar(255)
-);
+-- drop table if exists `admin_logs`;
+-- create table `admin_logs` (
+--     `logid` INTEGER PRIMARY KEY AUTOINCREMENT,
+--     `admin_originid` varchar(255) NOT NULL,
+--     `admin_kookusrname` varchar(255) NOT NULL,
+--     `player_originid` varchar(255) NOT NULL,
+--     `gameid` BIGINT NOT NULL,
+--     `operation` varchar(32) NOT NULL,
+--     `reason` varchar(255)
+-- );
 
 PRAGMA foreign_keys = ON;

@@ -1,2 +1,4 @@
 khl.py
-sqlite3
+aiosqlite
+httpx
+bs4

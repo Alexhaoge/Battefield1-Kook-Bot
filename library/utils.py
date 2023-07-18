@@ -103,6 +103,13 @@ async def async_db_op(conn: str, sql: str, params: list):
     await db.close()
     return res    
 
+async def async_db_op_exe_many(conn: str, sql: str, params: list):
+    db = await aiosqlite.connect(conn)
+    cursor = await db.executemany(sql, params)
+    await db.commit()
+    await cursor.close()
+    await db.close()
+
 async def check_owner_perm(con: str, author: User, group: str, super_admin: list) -> bool:
     if author.username.lower()  + '#' + author.identify_num in super_admin:
         return True
@@ -123,19 +130,56 @@ def split_kook_name(name: str) -> Union[List[str], bool]:
 
 async def check_server_by_db(con: str, group: str, group_num: int) -> Union[Tuple, bool]:
     """
-    Check if the given server nickname exists in the database. Return (gameid, serverid) if the server exists, otherwise return boolean false.
+    Check if the given server nickname exists in the database. Return (gameId, persistedGameId) if the server exists, otherwise return boolean false.
     """
     existing_server = await async_db_op(con, "SELECT gameid, serverid FROM servers WHERE `group`=? AND group_num=?;", [group, group_num])
     return existing_server[0] if len(existing_server) else False
 
 
-class SessionIdError(Exception):
-    def __init__(self, msg: str = None, status_code: int = None):
+class RSPException(Exception):
+    code_dict = {
+        -32856: "玩家ID有误",
+        -32851: "服务器已过期或不存在",
+        -32857: "机器人无法处置管理员",
+        -35150: "战队不存在",
+        -32504: "EA服务器访问超时",
+        -34501: "服务器已过期或不存在",
+        -32602: "参数缺失"
+    }
+
+    def __init__(self, msg: str = None, error_code: int = None):
         self.msg = msg
-        self.status_code = status_code
+        self.code = error_code
     
     def __str__(self):
-        return f"{self.status_code}:{self.msg}"
+        return f"{self.code}:{self.msg}"
+    
+    def echo(self, admin_originid: str = None, admin_personaid: int = None):
+        if self.code in RSPException.code_dict.keys():
+            return RSPException.code_dict[self.code]
+        else:
+            msg_lower = self.msg.lower()
+            if "session expired" in msg_lower or "no varlid session" in msg_lower:
+                return f"{admin_originid}({admin_personaid})的SessionID失效，请联系管理员刷新"
+            elif "severnotrestartableexception" in msg_lower:
+                return "服务器未开启"
+            elif "org.apache.thrift.tapplicationexception" in msg_lower:
+                return "机器人无权限操作"
+            elif "rsperruserisalreadyvip" in msg_lower:
+                return "玩家已是vip"
+            elif "rsperrservervipmax" in msg_lower:
+                return "服务器VIP位已满"
+            elif "rsperrserverbanmax" in msg_lower:
+                return "服务器Ban位已满"
+            elif "rsperrinvalidmaprotationid" in msg_lower:
+                return "无效地图轮换"
+            elif "invalidlevelindexexception" in msg_lower:
+                return "图池索引错误"
+            elif "invalidserveridexception" in msg_lower:
+                return "服务器ServerId错误"
+            else:
+                return f"未知错误{self.__str__()}"
+
 
 def rsp_API(method_name: str, params: dict, sessionID: str) -> dict:
     params["game"] = "tunguska"
@@ -151,7 +195,7 @@ def rsp_API(method_name: str, params: dict, sessionID: str) -> dict:
     )
     res_json = res.json()
     if 'error' in res_json:
-        raise SessionIdError(res_json['error']['message'], res.status_code)
+        raise RSPException(res_json['error']['message'], res_json['error']['code'])
     return res_json
 
 async def async_rsp_API(method_name: str, params: dict, sessionID: str) -> dict: 
@@ -170,7 +214,7 @@ async def async_rsp_API(method_name: str, params: dict, sessionID: str) -> dict:
         )
         res_json = res.json()
         if 'error' in res_json:
-            raise SessionIdError(res_json['error']['message'], res.status_code)
+            raise RSPException(res_json['error']['message'], res_json['error']['code'])
         return res_json
 
 

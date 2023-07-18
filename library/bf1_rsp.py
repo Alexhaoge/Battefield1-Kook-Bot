@@ -1,14 +1,17 @@
 import logging
 
-from khl import Bot, Message
+from khl import Bot, Message, MessageTypes
 # from aiosqlite import Connection
 from asyncio import create_task, gather
 from httpx import Response
+from traceback import format_exception
+from datetime import date, timedelta
 
 from .util_dict import map_zh_dict, zh_team_name_by_key
 from .utils import (
-    request_API, async_request_API, async_rsp_API, async_db_op, zhconvert,
-    check_admin_perm, check_server_by_db, SessionIdError
+    request_API, async_request_API, async_rsp_API, 
+    async_db_op, zhconvert,
+    check_admin_perm, check_server_by_db, RSPException
 )
 
 def init_rsp(bot: Bot, conn: str, super_admin: list):
@@ -50,17 +53,14 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
             await msg.reply(f"已切换地图为{map_zh_dict[map_zh_dict[map_name]]}")
         except ValueError:
             await msg.reply('当前服务器图池中不存在该地图') # If the given map is not in server map pool
-        except SessionIdError as se:
-            if se.msg == 'ServerNotRestartableException':
-                await msg.reply(f"服务器未开启") # If the server is not started
-            else: # other sparta errors, might because the session id expired
-                await msg.reply(f"{se.msg}\n可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(str(e))
+            await msg.reply(format_exception(e, limit=2))
 
 
     # Kick player
-    @bot.command(name='kick')
+    @bot.command(name='kick', aliases=['k'])
     async def bf1_kick(msg:Message, group_name: str, group_num: int, originid: str, reason: str = None):
         # Check if the server nickname exists in the database and retrieve gameid, serverid
         server = await check_server_by_db(conn, group_name, group_num)
@@ -90,16 +90,12 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
                 "reason": zhconvert(reason) if reason else 'GENERAL'
             }, sessionID=admin[0][1])
             await msg.reply(f"从{group_name}#{group_num}中踢出{result['userName']}({reason})")
-        except SessionIdError as se:
-            if se.status_code == 403:
-                await msg.reply(f"{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
-            elif se.status_code == 422:
-                await msg.reply(f"无法踢出管理员或服务器绑定账号{admin[0][2]}({admin[0][0]})无权限")
-            else:
-                await msg.reply(f"{se.msg}\n可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(str(e))
-            
+            await msg.reply(format_exception(e, limit=2))
+
+
     ##############################################################################################
     # Switch player's side
     ##############################################################################################
@@ -156,16 +152,12 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
             if new_team_name in zh_team_name_by_key:
                 new_team_name = zh_team_name_by_key[new_team_name]
             await msg.reply(f"已将{group_name}#{group_num}中的{res_p['userName']}移动至队伍{3-teamid}({new_team_name})")
-        except SessionIdError as se:
-            if se.status_code == 403:
-                await msg.reply(f"{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
-            elif se.status_code == 422:
-                await msg.reply(f"玩家不在服务器中，或{admin[0][2]}({admin[0][0]})无权限")
-            else:
-                await msg.reply(f"{se.msg}\n可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(str(e))
-    
+            await msg.reply(format_exception(e, limit=2))
+
+
     ##############################################################################################
     # Ban and unban
     ##############################################################################################
@@ -199,15 +191,10 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
                 "personaId": str(player['id']),
             }, sessionID=admin[0][1])
             await msg.reply(f"已在{group_name}#{group_num}中封禁玩家{player['userName']}({reason})")
-        except SessionIdError as se:
-            if se.status_code in [401, 403]:
-                await msg.reply(f"{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
-            elif se.status_code == 500:
-                await msg.reply(f"{admin[0][2]}({admin[0][0]})无权限")
-            else:
-                await msg.reply(f"{se.msg}\n可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(str(e))
+            await msg.reply(format_exception(e, limit=2))
     
     @bot.command(name='unban')
     async def bf1_unban(msg:Message, group_name: str, group_num: int, originid: str):
@@ -243,15 +230,11 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
                     "personaId": str(player['id']),
                 }, sessionID=admin[0][1])
                 await msg.reply(f"已在{group_name}#{group_num}中解封玩家{player['userName']}")
-        except SessionIdError as se:
-            if se.status_code in [401, 403]:
-                await msg.reply(f"{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
-            elif se.status_code == 500:
-                await msg.reply(f"{admin[0][2]}({admin[0][0]})无权限")
-            else:
-                await msg.reply(f"{se.msg}\n可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
-            await msg.reply(str(e))
+            await msg.reply(format_exception(e, limit=2))
+
 
     ##############################################################################################
     # Ban/unban player from all server in one server group
@@ -269,15 +252,10 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
                 "personaId": str(player['id']),
             }, sessionID=admin[0][1])
             msg = f"封禁玩家{player['userName']}成功"
-        except SessionIdError as se:
-            if se.status_code in [401, 403]:
-                msg = f"{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新"
-            elif se.status_code == 500:
-                msg = f"{admin[0][2]}({admin[0][0]})无权限"
-            else:
-                msg = f"{se.msg}, 可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新"
+        except RSPException as se:
+            msg = se.echo(admin[0][2], admin[0][0])
         except Exception as e:
-            msg = str(e)
+            msg = format_exception(e, limit=2)
         return msg
     
     @bot.command(name="bana")
@@ -323,15 +301,11 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
                     "personaId": str(player['id']),
                 }, sessionID=admin[0][1])
                 msg = f"玩家{player['userName']}解封成功"
-        except SessionIdError as se:
-            if se.status_code in [401, 403]:
-                msg = f"{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新"
-            elif se.status_code == 500:
-                msg = f"{admin[0][2]}({admin[0][0]})无权限"
-            else:
-                msg = f"{se.msg}, 可能是{admin[0][2]}({admin[0][0]})的sessionID过期，请联系超管刷新"
+        except RSPException as se:
+            msg = se.echo(admin[0][2], admin[0][0])
         except Exception as e:
-            msg = str(e)
+            msg = format_exception(e, limit=2)
+        return msg
         return msg
 
     @bot.command(name="unbana")
@@ -356,22 +330,197 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         echos = await gather(*tasks, return_exceptions=True)
         await msg.reply('\n'.join([f"{s[0]}#{s[1]}:{e}" for s, e in zip(servers, echos)]))
 
-    # # 机器人限时vip数据不互通
-    # @bot.command(name='vip')
-    # async def bf1_vip(msg:Message, group_name: str, group_num: int, originid: str, date: int = None):
-    #     pass
 
-    # @bot.command(name='unvip')
-    # async def bf1_unvip(msg:Message, group_name: str, group_num: int, originid: str):
-    #     pass
+    ##############################################################################################
+    # Add and removing server VIPs (Temporary VIPs rely on our own db, not sync with other bots)
+    ##############################################################################################
+    @bot.command(name='vip')
+    async def bf1_vip(msg:Message, group_name: str, group_num: int, originid: str, days: int = None):
+        # Validate days:
+        if (days is not None) and ((days <= 0) or (days > 365)):
+            await msg.reply("请输入有效的VIP时限，必须是1~365的整数")
+            return
+        # Check if the server nickname exists in the database
+        server = await check_server_by_db(conn, group_name, group_num)
+        if not server:
+            await msg.reply(f'服务器{group_name}#{group_num}不存在')
+            return
+        # check permission
+        permission = await check_admin_perm(conn, msg.author, group_name, super_admin)
+        if not permission:
+            await msg.reply(f'你没有{group_name}群组管理员权限')
+            return
+        # Search for targeted player
+        player = await async_request_API('bf1', 'player', {'name': originid})
+        if isinstance(player, Response):
+            await msg.reply(f'玩家{originid}不存在')
+            return 
+        # Check if targeted player already have vip
+        existing_vip = await async_db_op(conn, "SELECT expire FROM server_vips WHERE personaid=? AND gameid=?;",
+                                             [player['id'], server[0]])
+        if len(existing_vip):
+            if (existing_vip[0][0] is None) and days:
+                await msg.reply(f"玩家{player['id']}已经是{group_name}#{group_num}的永久vip")
+                return
+            expire = date.fromisoformat(existing_vip[0][0]) + timedelta(days=days) if days else None
+        else:
+            expire = date.today() + timedelta(days=days) if days else None
+        # Find the admin account
+        admin = await async_db_op(conn, "SELECT personaid, sessionid, originid FROM accounts WHERE personaid IN \
+                    (SELECT bf1admin FROM servers WHERE `group`=? AND group_num=?);",
+                    [group_name, group_num])
+        try:
+            server_res = await async_rsp_API(method_name='GameServer.getFullServerDetails', 
+                                params={'gameId': str(server[0])}, sessionID=admin[0][1])
+            await async_rsp_API("RSP.addServerVip", params={
+                "game": "tunguska",
+                "serverId": str(server_res['result']['rspInfo']['server']['serverId']),
+                "personaId": str(player['id']),
+            }, sessionID=admin[0][1])
+            if len(existing_vip):
+                await async_db_op(conn, "UPDATE server_vips SET expire=? WHERE personaid=? AND gameid=?;",
+                                  [expire, player['id'], server[0]])
+            else:
+                await async_db_op(conn, "INSERT INTO server_vips (personaid, originid, gameid, expire) VALUES (?, ?, ? ,?)",
+                                  [player['id'], player['userName'], server[0], expire])
+            await msg.reply(f"已在{group_name}#{group_num}中为玩家{player['userName']}添加VIP")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
+        except Exception as e:
+            await msg.reply(format_exception(e, limit=2))
 
-    # @bot.command(name='viplist')
-    # async def bf1_viplist(msg:Message, group_name: str, group_num: int):
-    #     pass
+    @bot.command(name='unvip')
+    async def bf1_unvip(msg:Message, group_name: str, group_num: int, originid: str):
+        # Check if the server nickname exists in the database
+        server = await check_server_by_db(conn, group_name, group_num)
+        if not server:
+            await msg.reply(f'服务器{group_name}#{group_num}不存在')
+            return
+        # check permission
+        permission = await check_admin_perm(conn, msg.author, group_name, super_admin)
+        if not permission:
+            await msg.reply(f'你没有{group_name}群组管理员权限')
+            return
+        # Search for targeted player
+        player = await async_request_API('bf1', 'player', {'name': originid})
+        if isinstance(player, Response):
+            await msg.reply(f'玩家{originid}不存在')
+            return
+        # Check if targeted player have vip
+        existing_vip = await async_db_op(conn, "SELECT personaid, gameid FROM server_vips WHERE personaid=? AND gameid=?;",
+                                             [player['id'], server[0]])
+        # Find the admin account
+        admin = await async_db_op(conn, "SELECT personaid, sessionid, originid FROM accounts WHERE personaid IN \
+                    (SELECT bf1admin FROM servers WHERE `group`=? AND group_num=?);",
+                    [group_name, group_num])
+        try:
+            server_res = await async_rsp_API(method_name='GameServer.getFullServerDetails', 
+                                params={'gameId': str(server[0])}, sessionID=admin[0][1])
+            await async_rsp_API("RSP.removeServerVip", params={
+                "game": "tunguska",
+                "serverId": str(server_res['result']['rspInfo']['server']['serverId']),
+                "personaId": str(player['id']),
+            }, sessionID=admin[0][1])
+            if len(existing_vip):
+                await async_db_op(conn, "DELETE FROM server_vips WHERE personaid=? AND gameid=?;",
+                                  [player['id'], server[0]])
+            await msg.reply(f"已从{group_name}#{group_num}删除玩家{player['userName']}的VIP")
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
+        except Exception as e:
+            await msg.reply(format_exception(e, limit=2))
 
-    # @bot.command(name='checkvip')
-    # async def bf1_checkvip(msg:Message, group_name: str, group_num: int):
-    #     pass
+    @bot.command(name='viplist')
+    async def bf1_viplist(msg:Message, group_name: str, group_num: int):
+        # Check if the server nickname exists in the database
+        server = await check_server_by_db(conn, group_name, group_num)
+        if not server:
+            await msg.reply(f'服务器{group_name}#{group_num}不存在')
+            return
+        # check permission
+        permission = await check_admin_perm(conn, msg.author, group_name, super_admin)
+        if not permission:
+            await msg.reply(f'你没有{group_name}群组管理员权限')
+            return
+        admin = await async_db_op(conn, "SELECT personaid, sessionid, originid FROM accounts WHERE personaid IN \
+                    (SELECT bf1admin FROM servers WHERE `group`=? AND group_num=?);",
+                    [group_name, group_num])
+        try:
+            # Find the vip list in db
+            db_vips = await async_db_op(conn, "SELECT personaid, originid, expire FROM server_vips WHERE gameid=?;", [server[0]])
+            db_vip_dict = {p[0]:(p[1], p[2] if p[2] else '永久') for p in db_vips}
+            db_vip_pids_set = set(db_vip_dict.keys())
+            # Find the vip list from EA API
+            server_res = await async_rsp_API(method_name='GameServer.getFullServerDetails', 
+                                params={'gameId': str(server[0])}, sessionID=admin[0][1])
+            server_vips_dict = {int(p['personaId']):p['displayName'] for p in server_res['result']['rspInfo']['vipList']}
+            server_vips_set = set(server_vips_dict.keys())
+            # Deal with differences between two vip list
+            db_vips_to_delete = list(db_vip_pids_set - server_vips_set)
+            await async_db_op(conn, "DELETE FROM server_vips WHERE gameid=? AND personaid IN ({})".format(",".join("?" * len(db_vip_dict))),
+                              [server[0]] + db_vips_to_delete)
+            vips_intersect = sorted([f"{db_vip_dict[pid][0]}({db_vip_dict[pid][1]})" 
+                              for pid in server_vips_set.intersection(db_vip_pids_set)])
+            vips_intersect_str = '  \n'.join(vips_intersect)
+            vips_not_in_db = sorted([server_vips_dict[pid] for pid in (server_vips_set - db_vip_pids_set)])
+            vips_not_in_db_str = '  \n'.join(vips_not_in_db)
+            await msg.reply(f"{group_name}#{group_num}共有 **{len(server_vips_dict)}**个VIP  \n" +
+                            f"机器人数据库记录VIP **{len(vips_intersect)}**个  \n{vips_intersect_str}  \n" +
+                            f"非数据库记录VIP **{len(vips_not_in_db)}**个  \n{vips_not_in_db_str}  \n" +
+                            f"机器人数据库删除不存在的VIP记录 **{len(db_vips_to_delete)}**个",
+                            type=MessageTypes.KMD)
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
+        except Exception as e:
+            await msg.reply(format_exception(e, limit=2))
+
+    @bot.command(name='checkvip')
+    async def bf1_checkvip(msg:Message, group_name: str, group_num: int):
+        # Check if the server nickname exists in the database
+        server = await check_server_by_db(conn, group_name, group_num)
+        if not server:
+            await msg.reply(f'服务器{group_name}#{group_num}不存在')
+            return
+        # check permission
+        permission = await check_admin_perm(conn, msg.author, group_name, super_admin)
+        if not permission:
+            await msg.reply(f'你没有{group_name}群组管理员权限')
+            return
+        admin = await async_db_op(conn, "SELECT personaid, sessionid, originid FROM accounts WHERE personaid IN \
+                    (SELECT bf1admin FROM servers WHERE `group`=? AND group_num=?);",
+                    [group_name, group_num])
+        try:
+            # Find the expired vip list in db
+            db_expired_vips = await async_db_op(conn, "SELECT personaid, originid FROM server_vips \
+                                        WHERE gameid=? AND expire < date('now');", [server[0]])
+            # Find serverId
+            server_res = await async_rsp_API(method_name='GameServer.getFullServerDetails', 
+                                params={'gameId': str(server[0])}, sessionID=admin[0][1])
+            serverid = server_res['result']['rspInfo']['server']['serverId']
+            # Create tasks for each expired VIP and execute them
+            tasks = [create_task(
+                async_rsp_API("RSP.removeServerVip", params={
+                    "game": "tunguska",
+                    "serverId": str(serverid),
+                    "personaId": str(v[0]),
+                }, sessionID=admin[0][1]))
+                for v in db_expired_vips
+            ]
+            # Filter echos, count errors(failed)
+            echos = await gather(*tasks, return_exceptions=True)
+            failed_ind = [i for i in range(len(echos)) if isinstance(echos[i], Exception)]
+            success_ind = [i for i in range(len(echos)) if not isinstance(echos[i], Exception)]
+            await async_db_op(conn, "DELETE FROM server_vips WHERE gameid=? AND personaid IN ({})".format(",".join("?" * len(success_ind))),
+                              [server[0]] + [db_expired_vips[i][0] for i in success_ind])
+            await msg.reply(f"成功删除**{len(success_ind)}**个过期VIP"+
+                            (f"，**{len(failed_ind)}个VIP删除失败**:" if len(failed_ind) else '') + 
+                            "\n  " + '\n  '.join([db_expired_vips[i][1] for i in failed_ind]),
+                            type=MessageTypes.KMD)
+        except RSPException as se:
+            await msg.reply(se.echo(admin[0][2], admin[0][0]))
+        except Exception as e:
+            await msg.reply(format_exception(e, limit=2))
+
 
     # @bot.command(name="pl")
     # async def bf1_playerlist(msg: Message, group_name: str, originid: str):
