@@ -372,11 +372,13 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         try:
             server_res = await async_rsp_API(method_name='GameServer.getFullServerDetails', 
                                 params={'gameId': str(server[0])}, sessionID=admin[0][1])
-            await async_rsp_API("RSP.addServerVip", params={
-                "game": "tunguska",
-                "serverId": str(server_res['result']['rspInfo']['server']['serverId']),
-                "personaId": str(player['id']),
-            }, sessionID=admin[0][1])
+            server_vips= [int(p['personaId']) for p in server_res['result']['rspInfo']['vipList']]
+            if not player['id'] in server_vips:
+                await async_rsp_API("RSP.addServerVip", params={
+                    "game": "tunguska",
+                    "serverId": str(server_res['result']['rspInfo']['server']['serverId']),
+                    "personaId": str(player['id']),
+                }, sessionID=admin[0][1])
             if len(existing_vip):
                 await async_db_op(conn, "UPDATE server_vips SET expire=? WHERE personaid=? AND gameid=?;",
                                   [expire, player['id'], server[0]])
