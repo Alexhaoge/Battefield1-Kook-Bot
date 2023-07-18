@@ -306,7 +306,6 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
         except Exception as e:
             msg = format_exc(limit=2)
         return msg
-        return msg
 
     @bot.command(name="unbana")
     async def bf1_unban_all(msg: Message, group_name: str, originid: str, reason: str = None):

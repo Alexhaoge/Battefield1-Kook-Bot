@@ -111,3 +111,68 @@ def render_recent_card(d: list):
         )
         c.append(Module.Divider())
     return CardMessage(c)
+
+
+def render_help_card():
+    c = Card(theme=Types.Theme.SUCCESS, size=Types.Size.LG)
+    c.append(Module.Header("使用说明"))
+    c.append(Module.Divider())
+    c.append(Module.Section(Element.Text("**战绩查询**")))
+    c.append(Module.Section(Element.Text(
+        "1. 查战绩: /stat OriginID\n2. 查最近游戏: /r OriginID\n"+
+        "3. 查服务器: /f 服务器关键字\n4. 绑定账号(绑定后查询战绩可省略id): /bind OriginID",
+        type=Types.Text.PLAIN
+    )))
+    c.append(Module.Divider())
+    c.append(Module.Section(Element.Text("**服务器管理**")))
+    c.append(Module.Section(Element.Text(
+        "5. 换图: /map 服务器组名 服务器组内编号 地图关键词\n"+
+        "6. 踢人: /kick 服务器组名 服务器组内编号 originid 理由(可省略)\n"+
+        "7.挪人: /move 服务器组名 服务器组内编号 originid\n"+
+        "8. 封禁玩家: /ban 服务器组名 服务器组内编号 OriginID 理由(可省略), /bana 服务器组名 OriginID 理由(可省略)\n"+
+        "9. 解封玩家: /unban 服务器组名 服务器组内编号 OriginID, /unbana 服务器组名 OriginID\n"+
+        "10. 添加VIP: /vip 服务器组名 服务器组内编号 OriginID 天数(省略即为永久VIP)\n" +
+        "11. 移除VIP: /unvip 服务器组名 服务器组内编号 OriginID\n"+
+        "12. 查看现有VIP列表: /viplist 服务器名 服务器组内编号\n"+
+        "13. 移除过期VIP: /checkvip 服务器名 服务器组内编号",
+        type=Types.Text.PLAIN
+    )))
+    c.append(Module.Divider())
+    c.append(Module.Section(Element.Text("**服务器绑定和权限管理**")))
+    c.append(Module.Section(Element.Text(
+        "14. 添加服务器组： /group 服务器组名 所有者Kook用户名\n"
+        "15. 修改服务器组所有者: /chown 服务器组名 新所有者Kook用户名\n"+
+        "16. 删除服务器组： /rmgroup 服务器组名\n"+
+        "17. 添加服务器: /server 服务器组名 服务器组内编号 服管OriginId\n"+
+        "18. 删除服务器: /rmserver 服务器组名 服务器组内编号\n"+
+        "19. 添加/删除服务器管理员: /admin 服务器组名 Kook用户名, /rmadmin 服务器组名 Kook用户名\n"+
+        "20. 添加服管账号: /account OriginID remid sid",
+        type=Types.Text.PLAIN
+    )))
+    c.append(Module.Divider())
+    c.append(Module.Section(Element.Text("**其他**")))
+    c.append(Module.Section(Element.Text(
+        "21. 帮助: /help\n"+
+        "22. 关于: /about\n"+
+        "23. 随机问候: /hello\n"+
+        "24. 涩图: 自己试一下doge",
+        type=Types.Text.PLAIN
+    )))
+    return CardMessage(c)
+
+def render_about_card():
+    c = Card(theme=Types.Theme.SUCCESS, size=Types.Size.LG)
+    c.append(Module.Header("关于 - bf1bot"))
+    c.append(Module.Divider())
+    c.append(Module.Section(Element.Text(
+        "基于khl.py开发，用于战地1战绩查询、服务器管理的KOOK机器人\n"
+        "开发者: [Alexhaoge](https://github.com/Alexhaoge)(OpenBLAS#2162)\n"+
+        "项目仓库: [https://github.com/Alexhaoge/Battefield1-Kook-Bot](https://github.com/Alexhaoge/Battefield1-Kook-Bot)\n"+
+        "开源协议: GPL-3.0"
+    )))
+    c.append(Module.Section(Element.Text(
+        "数据来源: Battlefield 1, [Battlefield Tracker](https://battlefieldtracker.com/bf1/), [api.gametools.network](https://api.gametools.network/docs)\n"+
+        "部分代码参考:\nMag1Catz的[Bf3090bot](https://gitee.com/mag1catz/bf3090bot), [xiaomai-bot](https://github.com/g1331/xiaomai-bot), [BF1ServerTools](https://github.com/CrazyZhang666/BF1ServerTools)\n"+
+        "特别鸣谢: [Mag1Catz](https://gitee.com/mag1catz)"
+    )))
+    return CardMessage(c)
