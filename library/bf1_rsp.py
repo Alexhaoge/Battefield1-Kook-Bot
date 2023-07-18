@@ -383,7 +383,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
             else:
                 await async_db_op(conn, "INSERT INTO server_vips (personaid, originid, gameid, expire) VALUES (?, ?, ? ,?)",
                                   [player['id'], player['userName'], server[0], expire])
-            await msg.reply(f"已在{group_name}#{group_num}中为玩家{player['userName']}添加VIP")
+            await msg.reply(f"已在{group_name}#{group_num}中为玩家{player['userName']}添加VIP({expire})")
         except RSPException as se:
             await msg.reply(se.echo(admin[0][2], admin[0][0]))
         except Exception as e:
@@ -457,8 +457,9 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
             server_vips_set = set(server_vips_dict.keys())
             # Deal with differences between two vip list
             db_vips_to_delete = list(db_vip_pids_set - server_vips_set)
-            await async_db_op(conn, "DELETE FROM server_vips WHERE gameid=? AND personaid IN ({})".format(",".join("?" * len(db_vip_dict))),
-                              [server[0]] + db_vips_to_delete)
+            if len(db_vips_to_delete):
+                await async_db_op(conn, "DELETE FROM server_vips WHERE gameid=? AND personaid IN ({})".format(",".join("?" * len(db_vip_dict))),
+                                [server[0]] + db_vips_to_delete)
             vips_intersect = sorted([f"{db_vip_dict[pid][0]}({db_vip_dict[pid][1]})" 
                               for pid in server_vips_set.intersection(db_vip_pids_set)])
             vips_intersect_str = '  \n'.join(vips_intersect)
