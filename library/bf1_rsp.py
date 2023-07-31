@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from .util_dict import map_zh_dict, zh_team_name_by_key
 from .utils import (
     request_API, async_request_API, async_rsp_API, 
-    async_db_op, zhconvert,
+    async_db_op, zh_simp_to_trad,
     check_admin_perm, check_server_by_db, RSPException
 )
 
@@ -87,7 +87,7 @@ def init_rsp(bot: Bot, conn: str, super_admin: list):
                 "game": "tunguska",
                 "gameId": str(server[0]),
                 "personaId": str(result['id']),
-                "reason": zhconvert(reason) if reason else 'GENERAL'
+                "reason": zh_simp_to_trad(reason) if reason else 'GENERAL'
             }, sessionID=admin[0][1])
             await msg.reply(f"从{group_name}#{group_num}中踢出{result['userName']}({reason})")
         except RSPException as se:

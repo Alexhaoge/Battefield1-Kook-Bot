@@ -218,7 +218,7 @@ async def async_rsp_API(method_name: str, params: dict, sessionID: str) -> dict:
         return res_json
 
 
-def zhconvert(str:str):
+def zh_simp_to_trad(str:str):
     str1 = ''
     for i in str:
         j = STR_SIMP.find(i)
@@ -226,4 +226,14 @@ def zhconvert(str:str):
             str1 = str1 + i
         else:
             str1 = str1 + STR_TRAD[j]
+    return str1
+
+def zh_trad_to_simp(str:str):
+    str1 = ''
+    for i in str:
+        j = STR_TRAD.find(i)
+        if j == -1:
+            str1 = str1 + i
+        else:
+            str1 = str1 + STR_SIMP[j]
     return str1

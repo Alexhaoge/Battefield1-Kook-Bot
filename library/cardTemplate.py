@@ -1,6 +1,16 @@
 import time
 from khl.card import CardMessage, Card, Module, Element, Types, Struct
 from .util_dict import map_zh_dict
+from .utils import zh_trad_to_simp
+
+def service_star_helper(kills: int) -> str:
+    stars = kills // 100
+    if stars < 50:
+        return f'{stars}★'
+    elif stars < 100:
+        return f'(font){stars}★(font)[success]'
+    else:
+        return f'(font){stars}★(font)[warning]'
 
 def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
     """
@@ -13,21 +23,21 @@ def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
         Module.Section(Element.Text("**基本数据**\n")),
         Module.Section(Struct.Paragraph(
             3,
-            Element.Text(f"**等级**:\n{d['rank']}"),
-            Element.Text(f"**游戏时间**:\n{round(d['secondsPlayed']/3600, 2)}小时"),
-            Element.Text(f"**击杀**:\n{d['kills']}"),
-            Element.Text(f"**死亡**:\n{d['deaths']}"),
-            Element.Text(f"**KD**:\n{d['killDeath']}"),
-            Element.Text(f"**KPM**:\n{d['killsPerMinute']}"),
-            Element.Text(f"**SPM**:\n{d['scorePerMinute']}"),
-            Element.Text(f"**复活**:\n{d['revives']}"),
-            Element.Text(f"**治疗**:\n{d['heals']}"),
-            Element.Text(f"**修理**:\n{d['repairs']}"),
-            Element.Text(f"**命中**:\n{d['accuracy']}"),
-            Element.Text(f"**爆头**:\n{d['headshots']}"),
-            Element.Text(f"**最远爆头**:\n{d['longestHeadShot']}"),
-            Element.Text(f"**胜率**:\n{d['winPercent']}"),
-            Element.Text(f"**最高连杀**:\n{d['highestKillStreak']}")
+            Element.Text(f"*等级*:\n{d['rank']}"),
+            Element.Text(f"*游戏时间*:\n{round(d['secondsPlayed']/3600, 2)}小时"),
+            Element.Text(f"*击杀*:\n{d['kills']}"),
+            Element.Text(f"*死亡*: {d['deaths']}"),
+            Element.Text(f"*KD*: {d['killDeath']}"),
+            Element.Text(f"*KPM*: {d['killsPerMinute']}"),
+            Element.Text(f"*SPM*: {d['scorePerMinute']}"),
+            Element.Text(f"*复活*: {d['revives']}"),
+            Element.Text(f"*治疗*: {d['heals']}"),
+            Element.Text(f"*修理*: {d['repairs']}"),
+            Element.Text(f"*命中*: {d['accuracy']}"),
+            Element.Text(f"*爆头*: {d['headshots']}"),
+            Element.Text(f"*最远爆头*: {d['longestHeadShot']}"),
+            Element.Text(f"*胜率*: {d['winPercent']}"),
+            Element.Text(f"*最高连杀*: {d['highestKillStreak']}")
         )),
         Module.Section(
             f"最后更新于{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
@@ -37,36 +47,36 @@ def render_stat_card(d: dict, top_n: int = 3) -> CardMessage:
     
     weapons = sorted(d['weapons'], key=lambda k: k['kills'], reverse=True)[0:top_n]
     c2 = Card(
-        Module.Section(Element.Text("**武器信息**\n")), 
+        Module.Section(Element.Text("**武器信息**\n")),
         theme=Types.Theme.SUCCESS, size=Types.Size.LG
     )
     for w in weapons:
+        c2.append(Module.Section(Element.Text(f"**{zh_trad_to_simp(w['weaponName'])}**")))
         c2.append(Module.Section(Struct.Paragraph(
             3,
-            Element.Text(f"**{w['weaponName']}**"),
-            Element.Text(f"**游戏时间**:\n{round(w['timeEquipped']/3600, 2)}小时"),
-            Element.Text(f"**击杀**:\n{w['kills']}"),
-            Element.Text(f"**命中**:\n{w['accuracy']}"),
-            Element.Text(f"**KPM**:\n{w['killsPerMinute']}"),
-            Element.Text(f"**爆头**:\n{w['headshotKills']}"),
-            Element.Text(f"**爆头率**:\n{w['headshots']}"),
-            Element.Text(f"**效率**:\n{w['hitVKills']}")
+            Element.Text(f"*时长*: {round(w['timeEquipped']/3600, 2)}小时"),
+            Element.Text(f"*击杀*: {w['kills']}({service_star_helper(w['kills'])})"),
+            Element.Text(f"*命中率*: {w['accuracy']}"),
+            Element.Text(f"*KPM*: {w['killsPerMinute']}"),
+            Element.Text(f"*爆头率*: {w['headshots']}"),
+            Element.Text(f"*效率*: {w['hitVKills']}")
         )))
 
     vehicles = sorted(d['vehicles'], key=lambda k: k['kills'], reverse=True)[0:top_n]
     c3 = Card(
-        Module.Section(Element.Text("**载具信息**\n")), 
+        Module.Section(Element.Text("**载具信息**\n")),
         theme=Types.Theme.SUCCESS, size=Types.Size.LG
     )
     for v in vehicles:
+        c3.append(Module.Section(Element.Text(f"**{zh_trad_to_simp(v['vehicleName'])}**")))
         c3.append(Module.Section(Struct.Paragraph(
             3, 
-            Element.Text(f"**{v['vehicleName']}**"),
-            Element.Text(f"**游戏时间**:\n{round(v['timeIn']/3600, 2)}小时"),
-            Element.Text(f"**击杀**:\n{v['kills']}"),
-            Element.Text(""),
-            Element.Text(f"**KPM**:\n{v['killsPerMinute']}"),
-            Element.Text(f"**摧毁**:\n{v['destroyed']}")
+            #Element.Text(f"**{v['vehicleName']}**"),
+            #Element.Text(f"**游戏时间**:{round(v['timeIn']/3600, 2)}小时"),
+            Element.Text(f"*击杀*: {v['kills']}({service_star_helper(v['kills'])})"),
+            #Element.Text(""),
+            Element.Text(f"*KPM*: {v['killsPerMinute']}"),
+            Element.Text(f"*摧毁*: {v['destroyed']}")
         )))
 
     return CardMessage(c1, c2, c3)
