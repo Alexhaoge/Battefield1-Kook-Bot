@@ -194,7 +194,7 @@ def init_server(bot: Bot, conn: str, super_admin: list):
         fig, ax = plt.subplots(1)
         fig.autofmt_xdate()
         plt.plot(times, server_array['soldierAmount'])
-        xfmt = DateFormatter('%d-%m-%y %H:%M')
+        xfmt = DateFormatter('%y-%m-%d %H:%M')
         ax.xaxis.set_major_formatter(xfmt)
         ax.set_title(f'{group_name}#{group_num}')
         #plt.show()
