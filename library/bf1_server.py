@@ -1,11 +1,18 @@
 import logging
+import traceback
 
-from khl import Bot, Message
+from khl import Bot, Message, MessageTypes
 # from aiosqlite import Connection
 from httpx import Response
+from matplotlib import pyplot as plt
+from matplotlib.dates import DateFormatter
+from datetime import datetime
 
 from .utils import (
-    request_API, async_db_op, check_owner_perm, split_kook_name
+    request_API, async_request_API,
+    async_db_op, check_owner_perm, split_kook_name,
+    check_admin_perm, check_server_by_db,
+    fig_to_kook_asset
 )
 
 def init_server(bot: Bot, conn: str, super_admin: list):
@@ -165,3 +172,38 @@ def init_server(bot: Bot, conn: str, super_admin: list):
         await async_db_op(conn, "DELETE FROM server_admins WHERE id=? AND `group`=?;",
             [existing_player[0][0], group_name])
         await msg.reply(f'已从群组{group_name}中移除管理员{kook}({existing_player[0][1]})')
+
+    @bot.command(name='draw', aliases=['k'])
+    async def bf1_draw_server_array(msg:Message, group_name: str, group_num: int, days: int = 1):
+        if days < 1 or days > 7:
+            msg.reply('只能查询近1-7天的服务器人数曲线')
+            return
+        # Check if the server nickname exists in the database and retrieve gameid, serverid
+        server = await check_server_by_db(conn, group_name, group_num)
+        if not server:
+            await msg.reply(f'服务器{group_name}#{group_num}不存在')
+            return
+        # check permission
+        permission = await check_admin_perm(conn, msg.author, group_name, super_admin)
+        if not permission:
+            await msg.reply(f'你没有超管/群组管理员权限')
+            return
+        server_array = await async_request_API('bf1', 'serverarray', {'gameid': server[0], 'days': days})
+        times = [datetime.fromisoformat(t).astimezone() for t in server_array['timeStamps']]
+        
+        fig, ax = plt.subplots(1)
+        fig.autofmt_xdate()
+        plt.plot(times, server_array['soldierAmount'])
+        xfmt = DateFormatter('%d-%m-%y %H:%M')
+        ax.xaxis.set_major_formatter(xfmt)
+        ax.set_title(f'{group_name}#{group_num}')
+        #plt.show()
+
+        try:
+            img_url = await fig_to_kook_asset(fig, bot)
+            logging.info(img_url)
+            await msg.reply(img_url, type=MessageTypes.IMG)
+        except:
+            logging.error(traceback.format_exc())
+            await msg.reply(traceback.format_exc(2))
+        

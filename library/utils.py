@@ -3,8 +3,11 @@ import re
 import aiosqlite
 import httpx
 import uuid
+from io import BytesIO
+from matplotlib.figure import Figure
+from matplotlib.pyplot import savefig
 from typing import Union, List, Tuple
-from khl import User
+from khl import User, Bot
 from .util_dict import STR_SIMP, STR_TRAD
 
 API_SITE = "https://api.gametools.network/"
@@ -237,3 +240,9 @@ def zh_trad_to_simp(str:str):
         else:
             str1 = str1 + STR_SIMP[j]
     return str1
+
+async def fig_to_kook_asset(fig: Figure, bot: Bot):
+    img_byte = BytesIO()
+    savefig(img_byte, format='png')
+    img_url = await bot.client.create_asset(BytesIO(img_byte.getvalue()))
+    return img_url

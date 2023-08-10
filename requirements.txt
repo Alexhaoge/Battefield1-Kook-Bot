@@ -2,3 +2,4 @@ khl.py
 aiosqlite
 httpx
 bs4
+matplotlib
