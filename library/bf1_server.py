@@ -6,7 +6,7 @@ from khl import Bot, Message, MessageTypes
 from httpx import Response
 from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .utils import (
     request_API, async_request_API,
@@ -189,12 +189,14 @@ def init_server(bot: Bot, conn: str, super_admin: list):
             await msg.reply(f'你没有超管/群组管理员权限')
             return
         server_array = await async_request_API('bf1', 'serverarray', {'gameid': server[0], 'days': days})
-        times = [datetime.fromisoformat(t).astimezone() for t in server_array['timeStamps']]
         
+        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        times = [datetime.fromisoformat(t) for t in server_array['timeStamps']]
+
         fig, ax = plt.subplots(1)
         fig.autofmt_xdate()
         plt.plot(times, server_array['soldierAmount'])
-        xfmt = DateFormatter('%y-%m-%d %H:%M')
+        xfmt = DateFormatter('%y-%m-%d %H:%M', tz=local_tz)
         ax.xaxis.set_major_formatter(xfmt)
         ax.set_title(f'{group_name}#{group_num}')
         #plt.show()
