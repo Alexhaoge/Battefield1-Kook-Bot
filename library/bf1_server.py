@@ -91,7 +91,7 @@ def init_server(bot: Bot, conn: str, super_admin: list):
                 logging.info(f'server {gameid} not found')
             await msg.reply(f'服务器{gameid}不存在')
             return
-        existing_admin = await async_db_op(conn, "SELECT personaid FROM accounts WHERE originid=?;", [bf1admin.lower()])
+        existing_admin = await async_db_op(conn, "SELECT personaid FROM accounts WHERE LOWER(originid)=LOWER(?);", [bf1admin])
         if not len(existing_admin):
             await msg.reply(f'管理员{bf1admin}不存在')
             return

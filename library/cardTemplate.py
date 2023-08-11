@@ -153,7 +153,7 @@ def render_help_card():
         "14. 添加服务器组： /group 服务器组名 所有者Kook用户名\n"
         "15. 修改服务器组所有者: /chown 服务器组名 新所有者Kook用户名\n"+
         "16. 删除服务器组： /rmgroup 服务器组名\n"+
-        "17. 添加服务器: /server 服务器组名 服务器组内编号 服管OriginId\n"+
+        "17. 添加服务器: /server 服务器gameid 服务器组名 服务器组内编号 服管OriginId\n"+
         "18. 删除服务器: /rmserver 服务器组名 服务器组内编号\n"+
         "19. 添加/删除服务器管理员: /admin 服务器组名 Kook用户名, /rmadmin 服务器组名 Kook用户名\n"+
         "20. 添加服管账号: /account OriginID remid sid",
